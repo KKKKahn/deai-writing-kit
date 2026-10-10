@@ -90,6 +90,15 @@ def analyze_structure(entries):
     print("  平均每段 run 数            %.2f%s" % (ratio, flag))
     print("  使用 pStyle 的段落数       %d%s" %
           (len(pstyles), "" if pstyles else "  ← 未使用任何标题样式，脚本直接设字体的特征"))
+
+    # 段落长度变异系数 CV
+    lengths = [sum(len(t.text or "") for t in p.iter(qn("w", "t"))) for p in paragraphs]
+    if lengths and sum(lengths):
+        mean = sum(lengths) / len(lengths)
+        var = sum((x - mean) ** 2 for x in lengths) / len(lengths)
+        cv = (var ** 0.5) / mean if mean else 0
+        flag = "" if cv >= 0.3 else "  ← 过低，段落被均匀切块（真人评述经验上多在 0.3 以上，经验值）"
+        print("  段落长度变异系数 CV       %.2f%s" % (cv, flag))
     print("  修订 w:ins / w:del         %d / %d" % (len(ins), len(dels)))
 
     # 批注
